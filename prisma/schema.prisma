@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model that connects with Clerk
+model User {
+  id            String          @id
+  email         String          @unique
+  username      String?
+  firstName     String?
+  lastName      String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  currentLevel  Int             @default(1)
+  totalPoints   Int             @default(0)
+  progress      UserProgress[]
+  achievements  UserAchievement[]
+  certificates  Certificate[]
+}
+
+// Level model for the 10 cybersecurity levels
+model Level {
+  id                Int               @id @default(autoincrement())
+  name              String
+  description       String
+  order             Int               @unique
+  minPointsToPass   Int
+  activities        Activity[]
+  requiredToAdvance Boolean           @default(true)
+  progress          UserProgress[]
+  achievements      Achievement[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+// Activity model for challenges, quizzes, and labs within levels
+model Activity {
+  id          Int               @id @default(autoincrement())
+  levelId     Int
+  level       Level             @relation(fields: [levelId], references: [id])
+  name        String
+  description String
+  type        ActivityType
+  content     Json              // Stores activity-specific content (questions, code templates, etc.)
+  points      Int
+  order       Int
+  isRequired  Boolean           @default(false)
+  progress    ActivityProgress[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([levelId, order])
+}
+
+// Progress tracking for users on each level
+model UserProgress {
+  id              Int       @id @default(autoincrement())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  levelId         Int
+  level           Level     @relation(fields: [levelId], references: [id])
+  isCompleted     Boolean   @default(false)
+  pointsEarned    Int       @default(0)
+  activitiesCompleted Int   @default(0)
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  activityProgress ActivityProgress[]
+
+  @@unique([userId, levelId])
+}
+
+// Progress tracking for individual activities
+model ActivityProgress {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  activityId  Int
+  activity    Activity  @relation(fields: [activityId], references: [id])
+  progressId  Int
+  progress    UserProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  isCompleted Boolean   @default(false)
+  pointsEarned Int      @default(0)
+  attempts    Int       @default(0)
+  lastAttemptAt DateTime?
+  completedAt DateTime?
+  answers     Json?     // Stores user's answers or solutions
+
+  @@unique([userId, activityId])
+}
+
+// Achievement/Badge model
+model Achievement {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String
+  imageUrl    String?
+  type        String?           // Add type field for achievement categorization
+  levelId     Int?
+  level       Level?            @relation(fields: [levelId], references: [id])
+  criteria    String            // Description of how to earn this achievement
+  pointsValue Int               @default(0)
+  users       UserAchievement[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+// User achievements junction table
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  earnedAt      DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+// Certificate model
+model Certificate {
+  id            Int       @id @default(autoincrement())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  issueDate     DateTime  @default(now())
+  verificationCode String  @unique
+  skills        String[]
+  imageUrl      String?
+}
+
+// Activity types enum
+enum ActivityType {
+  QUIZ
+  CODE_CHALLENGE
+  LAB
+  SIMULATION
+  READING
+}

@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cybersecurity Learning Platform
+
+A gamified cybersecurity learning platform with 10 progressive difficulty levels, each teaching a specific security concept.
+
+## Features
+
+- **User Authentication**: Secure user authentication and profile management with Clerk
+- **10 Progressive Learning Levels**:
+  - Level 1: Security Fundamentals (CIA triad, basic principles)
+  - Level 2: Network Security (protocols, firewalls, packet analysis)
+  - Level 3: Web Security (OWASP Top 10, injection attacks)
+  - Level 4: Cryptography (encryption, hashing, digital signatures)
+  - Level 5: Authentication & Authorization (access control, MFA)
+  - Level 6: Social Engineering (phishing detection, scenarios)
+  - Level 7: Malware Analysis (safe sample analysis)
+  - Level 8: Digital Forensics (evidence collection, analysis)
+  - Level 9: Incident Response (IR frameworks, simulations)
+  - Level 10: Advanced Persistent Threats (complex attacks)
+- **Interactive Challenges**: Various activity types including quizzes, code challenges, labs, and simulations
+- **Gamification**: Points system, achievements, and progress tracking
+- **Certificates**: Verifiable certificates upon completion of levels
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Clerk
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+ and npm
+- PostgreSQL database
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/cybersecurity-platform.git
+   cd cybersecurity-platform
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. Set up environment variables:
+   - Copy `.env.example` to `.env` and fill in your database and Clerk credentials
 
-To learn more about Next.js, take a look at the following resources:
+4. Set up the database:
+   ```bash
+   npm run prisma:generate
+   npm run prisma:push
+   npm run prisma:seed
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Deploy on Vercel
+## API Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Levels
+- `GET /api/levels` - Get all levels
+- `GET /api/levels/:levelId` - Get a specific level with its activities
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Activities
+- `GET /api/activities/:activityId` - Get a specific activity
+- `POST /api/activities/:activityId/progress` - Submit activity progress
+
+### Users
+- `GET /api/users` - Get current user
+- `POST /api/users` - Create or update user
+- `GET /api/users/progress` - Get user progress
+- `GET /api/users/achievements` - Get user achievements
+- `POST /api/users/achievements` - Award an achievement to a user
+
+### Achievements
+- `GET /api/achievements` - Get all achievements
+
+### Certificates
+- `GET /api/certificates` - Get all certificates or verify a certificate
+- `POST /api/certificates` - Generate a certificate
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
